@@ -15,7 +15,7 @@ import argparse
 import asyncio
 import logging
 import sys
-from datetime import date
+from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
@@ -83,7 +83,7 @@ async def run(args: argparse.Namespace) -> None:
         conn = init_db(db_path)
         write_snapshot(
             conn,
-            snapshot_date=date.today(),
+            snapshot_date=datetime.now(timezone.utc).date(),
             tier=canonical,
             wallet_count=summary.wallet_count,
             open_value_long_usd=summary.open_value_long_usd,
