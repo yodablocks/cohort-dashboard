@@ -175,7 +175,8 @@ def print_liq_risk_table(entries: list[LiqRiskEntry]) -> None:
     table.add_column("At Risk", justify="right", min_width=10)
     table.add_column("Risk %", justify="right", min_width=8)
 
-    for e in entries:
+    visible = [e for e in entries if e.at_risk_value_usd > 0]
+    for e in visible:
         risk_style = (
             "bold red" if e.risk_pct >= 50
             else "red" if e.risk_pct >= 25
