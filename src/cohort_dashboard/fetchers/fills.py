@@ -39,9 +39,10 @@ log = logging.getLogger(__name__)
 
 INFO_URL = "https://api.hyperliquid.xyz/info"
 TIMEOUT = 15.0
-CONCURRENCY = 6  # lower than positions fetcher: one call per wallet but still I/O-bound
+CONCURRENCY = 4  # lower than positions fetcher; fills API rate-limits aggressively at scale
 
-_RETRY_DELAYS = [2.0, 5.0]
+# One retry only, short delay. A fills miss shows as "n/a" -- acceptable fallback.
+_RETRY_DELAYS = [1.0]
 
 
 @dataclass(frozen=True)
