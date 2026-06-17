@@ -210,6 +210,82 @@ Only wallets that appear on the Hyperliquid leaderboard are included. Small or d
 - **Cohort bias sparkline** (requires accumulated daily snapshots -- start accumulating with `--save`)
 - **Cohort exposure time-series** (same -- start accumulating with `--save`)
 
+### Giga-Rekt with --ages example
+
+```
+cohort-dashboard --tier giga-rekt --ages
+╭─────────────────────── Summary ───────────────────────╮
+│ Tier: Giga-Rekt                                       │
+│ Wallets: 30                                           │
+│ Open Value: $11.7M Long  $39.6M Short  ($51.3M total) │
+│ In Profit: 8 (27%)  Underwater: 22 (73%)              │
+╰───────────────────────────────────────────────────────╯
+Data as of 2026-06-17 18:43 UTC
+
+  Wallet              Open Value       Equity     Exposure       Sum UPNL    Closest Liq        Age
+ ───────────────────────────────────────────────────────────────────────────────────────────────────
+  0x5e3ebe...97f8          $9.2M        $369K        25.0x      $59K loss           1.4%        10h
+  0x020ca6...5872          $8.9M        $355K        25.0x      $71K gain           2.0%        >1d
+  0x4e2328...20c3          $6.5M        $457K        14.3x     $198K loss           1.9%        n/a
+  0xc1a1a3...e3eb          $6.0M        $120K        49.9x      $28K loss           0.7%        30m
+  0x92772b...376c          $4.5M         $96K        47.0x      $15K loss           1.1%        n/a
+  0x12f147...807c          $2.9M         $74K        40.0x      $10K gain           1.5%     1d 17h
+  0x91f564...df13          $2.6M         $66K        40.0x       $1K gain           0.8%         2h
+  0x52e6c3...7725          $1.1M         $35K        31.8x       $9K loss           1.2%        n/a
+  0xe31062...d444          $903K         $30K        30.3x      $253 loss           1.6%        n/a
+  0x5581dc...293a          $813K         $26K        30.8x      $668 loss           1.6%        n/a
+  0x6d91e4...a39b          $781K         $19K        41.6x       $4K loss           1.1%         3h
+  0x196556...17f9          $757K         $15K        50.0x       $6K gain           1.6%        n/a
+  0xda12da...3973          $750K         $16K        48.3x       $3K loss           0.8%        31m
+  0x46560b...debd          $736K         $18K        40.0x       $3K loss           0.9%         6m
+  0xa72dc2...1807          $601K         $26K        23.1x       $4K loss           1.8%        n/a
+  0x87cabd...c10c          $581K         $17K        33.9x       $3K gain           1.8%        36m
+  0x6d9532...ff14          $567K         $16K        36.1x       $2K gain           1.5%        22m
+  0x1e2897...0e41          $514K         $26K        20.0x       $6K loss           1.5%        n/a
+  0x0facac...7a0a          $453K         $12K        38.2x      $11K loss           1.6%        n/a
+  0x9ca4d4...4fb9          $451K         $11K        40.0x      $535 loss           1.2%        12h
+  0x760faa...74c9          $437K          $8K        53.7x       $3K loss           0.6%        28m
+  0x5da043...8efa          $338K          $8K        40.0x       $1K loss           0.7%        20m
+  0x991068...297d          $301K         $11K        27.2x       $1K gain           2.0%        n/a
+  0xf1b671...26b3          $210K          $5K        40.0x       $3K loss           1.3%         8h
+  0x2c82a5...111b          $157K          $6K        25.0x      $205 gain           1.1%        13h
+  0xf68385...746c          $100K          $4K        24.7x       $1K loss           1.6%        n/a
+  0xda3cf9...f159           $58K          $1K        40.0x      $293 loss           0.7%         8m
+  0x07d431...2160            $6K         $244        23.1x       $36 loss           1.8%        n/a
+  0x663c79...2a2f            $6K         $139        40.0x       $29 loss           0.8%        10m
+  0xaea149...af38            $3K         $152        17.5x      $104 loss           0.7%        n/a
+
+                            Top Open Perps
+  Asset       Total Value         Long        Short        Bias
+ ────────────────────────────────────────────────────────────────
+  ETH              $18.3M        $8.9M        $9.4M      Neutral
+  BTC              $16.0M        $699K       $15.3M    Very Bearish
+  WDC               $6.5M           $0        $6.5M    Very Bearish
+  SP500             $5.7M        $450K        $5.3M    Very Bearish
+  XYZ100            $2.0M           $0        $2.0M    Very Bearish
+  GOLD              $1.1M        $1.1M           $0    Very Bullish
+  CL                $701K        $100K        $601K    Very Bearish
+  AMZN              $514K        $514K           $0    Very Bullish
+  JPY               $453K           $0        $453K    Very Bearish
+  SMH                 $6K           $0          $6K    Very Bearish
+
+Liquidation Risk by Asset (within 25% of liq price)
+  Asset       Total Value      At Risk     Risk %
+ ─────────────────────────────────────────────────
+  WDC               $6.5M        $6.5M     100.0%
+  SMH                 $6K          $6K     100.0%
+  XYZ100            $2.0M        $2.0M     100.0%
+  BTC              $16.0M       $16.0M     100.0%
+  ETH              $18.3M       $18.3M     100.0%
+  JPY               $453K        $453K     100.0%
+  CL                $701K        $701K     100.0%
+  SP500             $5.7M        $5.7M     100.0%
+  MRVL                $3K          $3K     100.0%
+  GOLD              $1.1M        $1.1M     100.0%
+  AMZN              $514K        $514K     100.0%
+```
+
+
 ### Snapshot schema
 
 `--save` writes one row per (date, tier) to `cohort_tier_snapshots`:
