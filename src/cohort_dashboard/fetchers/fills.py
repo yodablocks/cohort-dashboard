@@ -202,16 +202,32 @@ async def fetch_all_position_ages(
     wallet_positions: dict[str, list[tuple[str, str]]],
     *,
     concurrency: int = CONCURRENCY,
+    batch_sleep: float = 0.5,
 ) -> dict[str, dict[str, PositionAge]]:
-    """Fetch position ages for all wallets.
+    """Fetch position ages for all wallets in rate-limit-friendly batches.
 
     wallet_positions: {wallet_address: [(coin, side), ...]}
     Returns: {wallet_address: {coin: PositionAge}}
+
+    Processes wallets in batches of `concurrency` with a short sleep between
+    batches to avoid triggering userFills rate limits on large tiers.
+    asyncio.gather on all wallets at once floods the API regardless of the
+    semaphore -- batching is the correct fix.
     """
     sem = asyncio.Semaphore(concurrency)
-    tasks = {
-        wallet: fetch_position_ages(client, wallet, positions, sem)
-        for wallet, positions in wallet_positions.items()
-    }
-    results = await asyncio.gather(*tasks.values())
-    return dict(zip(tasks.keys(), results))
+    wallets = list(wallet_positions.keys())
+    out: dict[str, dict[str, PositionAge]] = {}
+
+    for i in range(0, len(wallets), concurrency):
+        batch = wallets[i:i + concurrency]
+        tasks = [
+            fetch_position_ages(client, w, wallet_positions[w], sem)
+            for w in batch
+        ]
+        results = await asyncio.gather(*tasks)
+        for wallet, result in zip(batch, results):
+            out[wallet] = result
+        if i + concurrency < len(wallets):
+            await asyncio.sleep(batch_sleep)
+
+    return out
