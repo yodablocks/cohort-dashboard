@@ -59,11 +59,16 @@ async def run(args: argparse.Namespace) -> None:
         if args.ages:
             from collections import defaultdict
             from cohort_dashboard.fetchers.fills import fetch_all_position_ages, CONCURRENCY as FILLS_CONCURRENCY
-            # Build per-wallet (coin, side) pairs from the classified positions.
             wallet_positions: dict[str, list[tuple[str, str]]] = defaultdict(list)
             for p in positions:
                 wallet_positions[p.wallet].append((p.coin, p.side))
-            # Use fills-specific concurrency (lower than positions) to avoid 429 cascade.
+            n_wallets = len(wallet_positions)
+            if n_wallets > 50:
+                console.print(
+                    f"[yellow]Warning: --ages works best on small tiers (<50 wallets). "
+                    f"This tier has {n_wallets} wallets -- expect many n/a values due to "
+                    f"userFills rate limits.[/yellow]"
+                )
             ages = await fetch_all_position_ages(client, dict(wallet_positions), concurrency=FILLS_CONCURRENCY)
 
     summary = compute_tier_summary(positions)
