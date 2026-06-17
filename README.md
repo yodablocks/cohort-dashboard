@@ -138,7 +138,7 @@ Liquidation Risk by Asset (within 25% of liq price)
 - **N/A on Closest Liq**: cross-margin position. The API does not return a per-position liquidation price for cross-margin accounts.
 - **Semi-rekt vs Giga-rekt**: semi-rekt is a PNL% tier (deep underwater but not necessarily near liquidation). Giga-rekt is a liq-proximity tier (about to be liquidated regardless of PNL%). A wallet can be semi-rekt with 64% liq distance -- bad PNL, but not immediately at risk.
 - **Age column** (requires `--ages`): how long the wallet's youngest tier position has been open. Format: "6h", "23h", "3d 4h". A `>` prefix (e.g. ">2d") means the position predates the 2000-fill API window -- the number is a floor, not the exact age. High-frequency wallets can exhaust the 2000-fill cap in under 24 hours.
-- **--ages rate limiting**: fills are fetched one wallet at a time with 300ms between each to stay within `userFills` rate limits. On 429, retries after 3s then 5s before giving up. On tiers with 100+ wallets a note is printed about expected wait time (~1s per wallet). Some wallets may still show `n/a` if the API rejects all retries.
+- **--ages rate limiting**: fills are fetched one wallet at a time with 300ms between each to stay within `userFills` rate limits. On 429, retries after 3s then 5s before giving up. On tiers with 100+ wallets a note is printed about expected wait time (~1s per wallet, so ~3-4 min for a 200-wallet tier). Validated at scale: 204-wallet semi-rekt run produced only 3 failures (1.5% error rate). Some wallets may still show `n/a` if the API rejects all retries.
 
 ### Money-Print example
 
@@ -261,6 +261,64 @@ Data as of 2026-06-17 20:00 UTC
   CRCL              $180K        $180K           $0    Very Bullish
 ```
 
+
+### Semi-Rekt with --ages example
+
+204 wallets, 8m 33s, 3 failures (1.5% error rate):
+
+```
+cohort-dashboard --tier semi-rekt --ages
+Note: fetching fill history for 204 wallets -- this will take a while and some wallets may show n/a.
+╭───────────────────────── Summary ─────────────────────────╮
+│ Tier: Semi-Rekt                                           │
+│ Wallets: 204                                              │
+│ Open Value: $462.8M Long  $577.7M Short  ($1040.5M total) │
+│ In Profit: 0 (0%)  Underwater: 204 (100%)                 │
+╰───────────────────────────────────────────────────────────╯
+Data as of 2026-06-17 20:18 UTC
+
+  Wallet              Open Value       Equity     Exposure       Sum UPNL    Closest Liq        Age
+ ───────────────────────────────────────────────────────────────────────────────────────────────────
+  0x92ea19...50e9         $81.6M       $16.3M         5.0x    $14.9M loss          81.0%        n/a
+  0xd47587...1a91         $66.2M       $16.3M         4.1x    $16.3M loss          34.7%    >1d 18h
+  0x32008f...c407         $64.8M        $5.6M        11.6x     $3.6M loss          19.6%     2d 17h
+  0xb83de0...6e36         $57.8M       $11.6M         5.0x     $4.7M loss          34.6%     >1d 3h
+  0x939f95...04d2         $35.3M        $4.7M         7.6x     $4.4M loss          25.5%   >12d 15h
+  0x007d76...67a0         $26.9M        $2.2M        12.1x     $2.6M loss          12.6%        n/a
+  0xeadc15...9d55         $26.8M        $3.7M         7.3x     $7.3M loss            N/A   >11d 15h
+  0xa2ce50...3126         $24.6M        $2.7M         9.1x     $2.0M loss          50.7%   >14d 21h
+  0xa31211...ad1e         $23.7M        $2.4M         9.8x     $1.2M loss          54.1%       >45m
+  0x4c78a9...2444         $23.5M        $6.4M         3.7x     $3.6M loss          19.4%        n/a
+  ...
+
+                            Top Open Perps
+  Asset       Total Value         Long        Short        Bias
+ ────────────────────────────────────────────────────────────────
+  HYPE            $262.3M        $1.1M      $261.2M    Very Bearish
+  BTC             $172.8M      $136.3M       $36.4M    Very Bullish
+  ETH             $114.4M       $60.0M       $54.5M      Neutral
+  SOL              $53.9M       $22.4M       $31.5M      Bearish
+  MU               $47.0M           $0       $47.0M    Very Bearish
+  NVDA             $42.7M       $42.5M        $223K    Very Bullish
+  SP500            $41.7M       $21.1M       $20.6M      Neutral
+  XYZ100           $32.9M       $19.0M       $13.8M      Bullish
+  SKHX             $25.4M           $0       $25.4M    Very Bearish
+  ZEC              $21.1M        $6.0M       $15.0M    Very Bearish
+
+Liquidation Risk by Asset (within 25% of liq price)
+  Asset       Total Value      At Risk     Risk %
+ ─────────────────────────────────────────────────
+  NVDA             $42.7M       $41.8M      97.9%
+  SKHX             $25.4M       $23.4M      92.1%
+  SPCX              $8.4M        $6.6M      78.4%
+  DRAM              $7.5M        $5.3M      70.5%
+  SP500            $41.7M       $20.5M      49.2%
+  MU               $47.0M       $16.5M      35.0%
+  ETH             $114.4M       $31.7M      27.7%
+  HYPE            $262.3M       $33.5M      12.8%
+  BTC             $172.8M       $19.2M      11.1%
+  SOL              $53.9M        $446K       0.8%
+```
 
 ### Snapshot schema
 
