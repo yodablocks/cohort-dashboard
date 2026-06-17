@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 
 from cohort_pnl.fetchers.positions import PositionRecord
-from cohort_dashboard.summary import compute_tier_summary
+from cohort_dashboard.summary import compute_tier_summary, compute_long_bias_pct, compute_avg_exposure
 
 
 def _pos(**kwargs) -> PositionRecord:
@@ -40,6 +40,41 @@ def test_tier_summary_basic():
     assert s.traders_in_profit == 1
     assert s.traders_underwater == 2
     assert abs(s.pct_in_profit - 33.33) < 0.1
+
+
+def test_compute_long_bias_pct_balanced():
+    positions = [
+        _pos(wallet="0x1", side="long",  mark_px=100.0, size=1.0),
+        _pos(wallet="0x2", side="short", mark_px=100.0, size=1.0),
+    ]
+    assert compute_long_bias_pct(positions) == 50.0
+
+
+def test_compute_long_bias_pct_all_long():
+    positions = [_pos(wallet="0x1", side="long", mark_px=100.0, size=2.0)]
+    assert compute_long_bias_pct(positions) == 100.0
+
+
+def test_compute_long_bias_pct_empty():
+    assert compute_long_bias_pct([]) == 50.0
+
+
+def test_compute_avg_exposure_basic():
+    # notional = 1.0 * 100 = 100, margin = 10 => exposure = 10x
+    # notional = 2.0 * 100 = 200, margin = 20 => exposure = 10x
+    # value-weighted: (100+200) / (10+20) = 10.0
+    positions = [
+        _pos(wallet="0x1", mark_px=100.0, size=1.0, margin_used=10.0),
+        _pos(wallet="0x2", mark_px=100.0, size=2.0, margin_used=20.0),
+    ]
+    result = compute_avg_exposure(positions)
+    assert result is not None
+    assert abs(result - 10.0) < 0.001
+
+
+def test_compute_avg_exposure_zero_margin():
+    positions = [_pos(wallet="0x1", mark_px=100.0, size=1.0, margin_used=0.0)]
+    assert compute_avg_exposure(positions) is None
 
 
 def test_tier_summary_empty():

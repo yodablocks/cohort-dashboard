@@ -21,6 +21,8 @@ cohort-dashboard --tier giga-rekt --concurrency 6
 | `--top` | 1000 | Cap wallet universe to first N leaderboard wallets (0 = all) |
 | `--concurrency` | 8 | Max concurrent API calls |
 | `--json` | off | Output raw JSON instead of rich tables |
+| `--save` | off | Write a daily snapshot to SQLite (accumulates data for v2 sparklines) |
+| `--db` | `data/cohort_dashboard_snapshots.db` | Path to the snapshot database |
 
 **Valid tiers:** `money-print`, `smart-money`, `grinder`, `humble-earner`, `exit-liquidity`, `semi-rekt`, `full-rekt`, `giga-rekt`
 
@@ -200,8 +202,25 @@ pip install -e '.'
 
 Only wallets that appear on the Hyperliquid leaderboard are included. Small or dormant wallets that have never ranked are not captured.
 
-## v2 (not yet built)
+## v2 (in progress)
 
-- Position age (requires `userFills` history per wallet)
-- Cohort bias time-series sparkline (requires accumulated daily snapshots)
-- Cohort exposure time-series chart (same)
+- **Position age** (requires `userFills` history per wallet -- in progress)
+- **Cohort bias sparkline** (requires accumulated daily snapshots -- start accumulating with `--save`)
+- **Cohort exposure time-series** (same -- start accumulating with `--save`)
+
+### Snapshot schema
+
+`--save` writes one row per (date, tier) to `cohort_tier_snapshots`:
+
+| Column | Description |
+|--------|-------------|
+| `snapshot_date` | ISO date of the run |
+| `tier` | Canonical tier name (e.g. "Giga-Rekt") |
+| `wallet_count` | Unique wallets with at least one position in this tier |
+| `open_value_long_usd` | Total notional of long positions |
+| `open_value_short_usd` | Total notional of short positions |
+| `long_bias_pct` | Long notional / total notional * 100 (cohort bias signal) |
+| `avg_exposure` | Value-weighted mean leverage across all positions (null if all cross-margin) |
+| `pct_in_profit` | % of wallets with net positive unrealized PNL |
+
+Run `cohort-dashboard --tier giga-rekt --save` daily to build up history for the sparklines.

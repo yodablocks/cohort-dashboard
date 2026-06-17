@@ -30,6 +30,36 @@ class TierSummary:
     pct_underwater: float  # by wallet count
 
 
+def compute_long_bias_pct(positions: list[PositionRecord]) -> float:
+    """long_open_value / total_open_value * 100. Returns 50.0 if no positions."""
+    long_val = 0.0
+    short_val = 0.0
+    for p in positions:
+        notional = abs(p.size) * p.mark_px
+        if p.side == "long":
+            long_val += notional
+        else:
+            short_val += notional
+    total = long_val + short_val
+    return (long_val / total * 100.0) if total > 0 else 50.0
+
+
+def compute_avg_exposure(positions: list[PositionRecord]) -> float | None:
+    """Value-weighted mean leverage: sum(notional_i) / sum(margin_i).
+
+    Returns None if total margin is zero (e.g. all cross-margin, margin_used = 0).
+    """
+    total_notional = 0.0
+    total_margin = 0.0
+    for p in positions:
+        notional = abs(p.size) * p.mark_px
+        total_notional += notional
+        total_margin += p.margin_used
+    if total_margin <= 0:
+        return None
+    return total_notional / total_margin
+
+
 def compute_tier_summary(positions: list[PositionRecord]) -> TierSummary:
     """Compute summary card numbers from all positions classified into one tier.
 
