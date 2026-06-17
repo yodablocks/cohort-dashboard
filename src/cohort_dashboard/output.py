@@ -49,6 +49,7 @@ def _pnl_pct(position: PositionRecord) -> float | None:
 
 
 def print_summary_card(tier_name: str, summary: TierSummary) -> None:
+    from datetime import datetime, timezone
     total_val = summary.open_value_long_usd + summary.open_value_short_usd
     lines = [
         f"Tier: [bold]{tier_name}[/bold]",
@@ -62,6 +63,8 @@ def print_summary_card(tier_name: str, summary: TierSummary) -> None:
         f"({summary.pct_underwater:.0f}%)",
     ]
     console.print(Panel("\n".join(lines), title="Summary", expand=False))
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    console.print(f"[dim]Data as of {now}[/dim]")
 
 
 def print_wallet_table(
