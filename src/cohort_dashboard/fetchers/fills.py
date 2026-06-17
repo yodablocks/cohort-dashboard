@@ -151,14 +151,23 @@ async def _fetch_fills_raw(
             try:
                 resp = await client.post(INFO_URL, json=body, timeout=TIMEOUT)
                 is_429 = resp.status_code == 429
-                if not is_429:
+                if is_429:
+                    log.debug("userFills 429 for %s (attempt %d)", wallet[:10], attempt)
+                else:
                     resp.raise_for_status()
                     return resp.json()
+            except httpx.TimeoutException as e:
+                log.warning("userFills TIMEOUT for %s: %s", wallet[:10], e)
+                return []
+            except httpx.HTTPStatusError as e:
+                log.warning(
+                    "userFills HTTP %s for %s: %s",
+                    e.response.status_code, wallet[:10], e,
+                )
+                return []
             except httpx.HTTPError as e:
-                is_429 = "429" in str(e)
-                if not is_429:
-                    log.warning("userFills failed for %s: %s", wallet, e)
-                    return []
+                log.warning("userFills ERROR for %s: %s", wallet[:10], e)
+                return []
 
         if attempt < len(_RETRY_DELAYS):
             await asyncio.sleep(_RETRY_DELAYS[attempt])

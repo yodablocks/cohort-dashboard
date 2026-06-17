@@ -57,8 +57,12 @@ async def run(args: argparse.Namespace) -> None:
             top=args.top,
         )
         if args.ages:
+            import logging as _logging
             from collections import defaultdict
             from cohort_dashboard.fetchers.fills import fetch_all_position_ages
+            fills_log = _logging.getLogger("cohort_dashboard.fetchers.fills")
+            fills_log.setLevel(_logging.DEBUG)
+            _logging.getLogger().handlers[0].setLevel(_logging.DEBUG)
             wallet_positions: dict[str, list[tuple[str, str]]] = defaultdict(list)
             for p in positions:
                 wallet_positions[p.wallet].append((p.coin, p.side))
