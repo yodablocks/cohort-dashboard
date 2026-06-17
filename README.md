@@ -135,6 +135,58 @@ Liquidation Risk by Asset (within 25% of liq price)
 - **N/A on Closest Liq**: cross-margin position. The API does not return a per-position liquidation price for cross-margin accounts.
 - **Semi-rekt vs Giga-rekt**: semi-rekt is a PNL% tier (deep underwater but not necessarily near liquidation). Giga-rekt is a liq-proximity tier (about to be liquidated regardless of PNL%). A wallet can be semi-rekt with 64% liq distance -- bad PNL, but not immediately at risk.
 
+### Money-Print example
+
+```
+cohort-dashboard --tier money-print
+╭──────────────────────── Summary ─────────────────────────╮
+│ Tier: Money Print                                        │
+│ Wallets: 176                                             │
+│ Open Value: $438.6M Long  $244.8M Short  ($683.4M total) │
+│ In Profit: 176 (100%)  Underwater: 0 (0%)                │
+╰──────────────────────────────────────────────────────────╯
+
+  Wallet              Open Value       Equity     Exposure       Sum UPNL    Closest Liq
+ ────────────────────────────────────────────────────────────────────────────────────────
+  0x6315c7...074a         $50.8M        $3.9M        13.0x     $6.9M gain          69.7%
+  0x32008f...c407         $48.3M        $2.9M        16.4x     $8.1M gain          42.0%
+  0x8af700...fa05         $36.7M        $3.9M         9.3x    $10.4M gain          88.7%
+  0x9e8b1e...afc4         $31.8M        $5.8M         5.5x     $3.2M gain          15.2%
+  0x8def9f...2dae         $25.5M        $2.5M        10.0x     $6.8M gain            N/A
+  ...
+
+                            Top Open Perps
+
+  Asset       Total Value         Long        Short        Bias
+ ────────────────────────────────────────────────────────────────
+  HYPE            $155.5M      $155.5M           $0    Very Bullish
+  BTC             $109.8M       $58.2M       $51.6M      Neutral
+  ETH              $95.0M       $46.4M       $48.6M      Neutral
+  ZEC              $49.8M       $37.9M       $11.9M    Very Bullish
+  CL               $31.8M           $0       $31.8M    Very Bearish
+  SP500            $27.3M       $27.3M           $0    Very Bullish
+  NEAR             $26.3M       $16.3M       $10.0M      Bullish
+  SOL              $20.8M       $14.3M        $6.5M      Bullish
+  WLD              $20.6M       $20.6M         $38K    Very Bullish
+  LIT              $18.0M       $18.0M           $0    Very Bullish
+
+Liquidation Risk by Asset (within 25% of liq price)
+
+  Asset       Total Value      At Risk     Risk %
+ ─────────────────────────────────────────────────
+  CL               $31.8M       $31.8M     100.0%
+  DRAM              $3.6M        $3.6M      99.9%
+  SPCX              $1.9M        $1.6M      84.4%
+  SOL              $20.8M       $12.4M      59.5%
+  BTC             $109.8M       $35.8M      32.6%
+  XRP              $17.1M        $4.2M      24.7%
+  ETH              $95.0M       $15.6M      16.5%
+  HYPE            $155.5M       $23.5M      15.1%
+  ZEC              $49.8M        $1.9M       3.8%
+  WLD              $20.6M        $665K       3.2%
+  ...
+```
+
 ## Install
 
 Requires [cohort-pnl](../cohort-pnl) installed first.
