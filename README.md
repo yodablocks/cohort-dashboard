@@ -74,6 +74,67 @@ Liquidation Risk by Asset (within 25% of liq price)
   ...
 ```
 
+### Semi-Rekt example
+
+```
+cohort-dashboard --tier semi-rekt
+╭───────────────────────── Summary ─────────────────────────╮
+│ Tier: Semi-Rekt                                           │
+│ Wallets: 192                                              │
+│ Open Value: $317.5M Long  $839.2M Short  ($1156.8M total) │
+│ In Profit: 0 (0%)  Underwater: 192 (100%)                 │
+╰───────────────────────────────────────────────────────────╯
+
+  Wallet              Open Value       Equity     Exposure       Sum UPNL    Closest Liq
+ ────────────────────────────────────────────────────────────────────────────────────────
+  0x92ea19...50e9         $83.6M       $16.7M         5.0x    $12.9M loss          84.2%
+  0xd47587...1a91         $68.4M       $16.4M         4.2x    $18.5M loss          32.9%
+  0x7fdafd...17d1         $66.3M        $4.5M        14.6x     $2.4M loss          62.9%
+  0xb83de0...6e36         $60.0M       $12.0M         5.0x     $6.9M loss          29.6%
+  0x32008f...c407         $58.4M        $4.4M        13.2x     $2.7M loss          20.6%
+  ...
+
+                            Top Open Perps
+
+  Asset       Total Value         Long        Short        Bias
+ ────────────────────────────────────────────────────────────────
+  HYPE            $282.7M           $0      $282.7M    Very Bearish
+  BTC             $254.8M      $109.6M      $145.2M      Bearish
+  ETH             $121.4M       $30.3M       $91.2M    Very Bearish
+  SOL              $49.2M       $14.3M       $34.9M    Very Bearish
+  MU               $48.2M           $0       $48.2M    Very Bearish
+  NVDA             $43.2M       $43.0M        $226K    Very Bullish
+  XRP              $31.3M        $9.2M       $22.1M    Very Bearish
+  SKHX             $26.1M           $0       $26.1M    Very Bearish
+  XYZ100           $21.7M        $665K       $21.0M    Very Bearish
+  SP500            $20.8M           $0       $20.8M    Very Bearish
+
+Liquidation Risk by Asset (within 25% of liq price)
+
+  Asset       Total Value      At Risk     Risk %
+ ─────────────────────────────────────────────────
+  CRWV              $2.5M        $2.5M     100.0%
+  CL               $18.3M       $18.2M      99.3%
+  NVDA             $43.2M       $42.3M      97.9%
+  ARM               $2.3M        $2.2M      94.8%
+  SKHX             $26.1M       $24.1M      92.2%
+  HOOD              $2.5M        $2.1M      82.0%
+  DRAM              $8.2M        $6.0M      73.0%
+  SPCX             $11.6M        $5.5M      47.5%
+  MU               $48.2M       $21.7M      45.1%
+  SP500            $20.8M        $5.3M      25.3%
+  HYPE            $282.7M       $65.1M      23.0%
+  ETH             $121.4M       $17.7M      14.5%
+  BTC             $254.8M       $32.4M      12.7%
+  ...
+```
+
+**Reading the output:**
+
+- **Closest Liq**: distance between mark price and liquidation price. Closer to 0% means liquidation is imminent. Values above 100% are short positions where price would need to more than double to trigger liquidation -- they are far from liquidation despite appearing in a rekt tier.
+- **N/A on Closest Liq**: cross-margin position. The API does not return a per-position liquidation price for cross-margin accounts.
+- **Semi-rekt vs Giga-rekt**: semi-rekt is a PNL% tier (deep underwater but not necessarily near liquidation). Giga-rekt is a liq-proximity tier (about to be liquidated regardless of PNL%). A wallet can be semi-rekt with 64% liq distance -- bad PNL, but not immediately at risk.
+
 ## Install
 
 Requires [cohort-pnl](../cohort-pnl) installed first.
