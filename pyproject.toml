@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cohort-dashboard"
+version = "0.1.0"
+description = "HyperTracker Cohort Intelligence -- single-tier drill view"
+requires-python = ">=3.11"
+dependencies = [
+    "cohort-pnl @ file:///Users/zkmarc/Coding_2026/cohort-pnl",
+    "httpx>=0.27",
+    "pyyaml>=6.0",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "respx>=0.21",
+]
+
+[project.scripts]
+cohort-dashboard = "cohort_dashboard.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
