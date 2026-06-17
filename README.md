@@ -138,7 +138,7 @@ Liquidation Risk by Asset (within 25% of liq price)
 - **N/A on Closest Liq**: cross-margin position. The API does not return a per-position liquidation price for cross-margin accounts.
 - **Semi-rekt vs Giga-rekt**: semi-rekt is a PNL% tier (deep underwater but not necessarily near liquidation). Giga-rekt is a liq-proximity tier (about to be liquidated regardless of PNL%). A wallet can be semi-rekt with 64% liq distance -- bad PNL, but not immediately at risk.
 - **Age column** (requires `--ages`): how long the wallet's youngest tier position has been open. Format: "6h", "23h", "3d 4h". A `>` prefix (e.g. ">2d") means the position predates the 2000-fill API window -- the number is a floor, not the exact age. High-frequency wallets can exhaust the 2000-fill cap in under 24 hours.
-- **--ages on large tiers**: fetches are batched (20 wallets at a time, 2s between batches) to stay within `userFills` rate limits. On tiers with 100+ wallets a note is printed about expected wait time. Some wallets may still show `n/a` if the API rejects individual requests.
+- **--ages rate limiting**: fills are fetched one wallet at a time with 300ms between each to stay within `userFills` rate limits. On 429, retries after 3s then 5s before giving up. On tiers with 100+ wallets a note is printed about expected wait time (~1s per wallet). Some wallets may still show `n/a` if the API rejects all retries.
 
 ### Money-Print example
 
@@ -217,73 +217,48 @@ Only wallets that appear on the Hyperliquid leaderboard are included. Small or d
 cohort-dashboard --tier giga-rekt --ages
 ╭─────────────────────── Summary ───────────────────────╮
 │ Tier: Giga-Rekt                                       │
-│ Wallets: 30                                           │
-│ Open Value: $11.7M Long  $39.6M Short  ($51.3M total) │
-│ In Profit: 8 (27%)  Underwater: 22 (73%)              │
+│ Wallets: 36                                           │
+│ Open Value: $29.1M Long  $10.8M Short  ($39.9M total) │
+│ In Profit: 5 (14%)  Underwater: 31 (86%)              │
 ╰───────────────────────────────────────────────────────╯
-Data as of 2026-06-17 18:43 UTC
+Data as of 2026-06-17 20:00 UTC
 
   Wallet              Open Value       Equity     Exposure       Sum UPNL    Closest Liq        Age
  ───────────────────────────────────────────────────────────────────────────────────────────────────
-  0x5e3ebe...97f8          $9.2M        $369K        25.0x      $59K loss           1.4%        10h
-  0x020ca6...5872          $8.9M        $355K        25.0x      $71K gain           2.0%        >1d
-  0x4e2328...20c3          $6.5M        $457K        14.3x     $198K loss           1.9%        n/a
-  0xc1a1a3...e3eb          $6.0M        $120K        49.9x      $28K loss           0.7%        30m
-  0x92772b...376c          $4.5M         $96K        47.0x      $15K loss           1.1%        n/a
-  0x12f147...807c          $2.9M         $74K        40.0x      $10K gain           1.5%     1d 17h
-  0x91f564...df13          $2.6M         $66K        40.0x       $1K gain           0.8%         2h
-  0x52e6c3...7725          $1.1M         $35K        31.8x       $9K loss           1.2%        n/a
-  0xe31062...d444          $903K         $30K        30.3x      $253 loss           1.6%        n/a
-  0x5581dc...293a          $813K         $26K        30.8x      $668 loss           1.6%        n/a
-  0x6d91e4...a39b          $781K         $19K        41.6x       $4K loss           1.1%         3h
-  0x196556...17f9          $757K         $15K        50.0x       $6K gain           1.6%        n/a
-  0xda12da...3973          $750K         $16K        48.3x       $3K loss           0.8%        31m
-  0x46560b...debd          $736K         $18K        40.0x       $3K loss           0.9%         6m
-  0xa72dc2...1807          $601K         $26K        23.1x       $4K loss           1.8%        n/a
-  0x87cabd...c10c          $581K         $17K        33.9x       $3K gain           1.8%        36m
-  0x6d9532...ff14          $567K         $16K        36.1x       $2K gain           1.5%        22m
-  0x1e2897...0e41          $514K         $26K        20.0x       $6K loss           1.5%        n/a
-  0x0facac...7a0a          $453K         $12K        38.2x      $11K loss           1.6%        n/a
-  0x9ca4d4...4fb9          $451K         $11K        40.0x      $535 loss           1.2%        12h
-  0x760faa...74c9          $437K          $8K        53.7x       $3K loss           0.6%        28m
-  0x5da043...8efa          $338K          $8K        40.0x       $1K loss           0.7%        20m
-  0x991068...297d          $301K         $11K        27.2x       $1K gain           2.0%        n/a
-  0xf1b671...26b3          $210K          $5K        40.0x       $3K loss           1.3%         8h
-  0x2c82a5...111b          $157K          $6K        25.0x      $205 gain           1.1%        13h
-  0xf68385...746c          $100K          $4K        24.7x       $1K loss           1.6%        n/a
-  0xda3cf9...f159           $58K          $1K        40.0x      $293 loss           0.7%         8m
-  0x07d431...2160            $6K         $244        23.1x       $36 loss           1.8%        n/a
-  0x663c79...2a2f            $6K         $139        40.0x       $29 loss           0.8%        10m
-  0xaea149...af38            $3K         $152        17.5x      $104 loss           0.7%        n/a
+  0xc1a1a3...e3eb          $8.2M        $132K        62.2x      $74K loss           0.4%        38m
+  0x92772b...376c          $8.2M        $207K        39.5x       $7K gain           1.5%        n/a
+  0x2fc319...3460          $5.4M         $93K        58.4x      $84K loss           0.5%         6h
+  0x020ca6...5872          $5.0M        $201K        25.0x      $92K loss           0.6%       >11h
+  0xf9140f...11c3          $3.4M        $336K        10.0x     $115K loss           1.8%        n/a
+  0x130925...4a8e          $1.5M         $37K        40.0x       $3K loss           1.5%        n/a
+  0xe81908...3d1c          $926K         $23K        40.0x      $20K loss           1.0%      1d 2h
+  0x6d91e4...a39b          $816K         $19K        42.5x      $789 loss           1.1%         6m
+  0xda12da...3973          $706K         $18K        40.1x      $207 gain           1.3%        18m
+  0x46560b...debd          $633K         $16K        40.0x       $6K loss           1.6%        38m
+  0xb86c32...7db9          $594K         $20K        30.1x      $447 loss           1.7%        n/a
+  0x6bde78...87d3          $527K         $13K        40.0x       $2K gain           1.7%        27m
+  0x1e2897...0e41          $510K         $26K        20.0x      $10K loss           0.8%        n/a
+  0x0facac...7a0a          $454K         $11K        41.1x      $12K loss           1.4%        n/a
+  0x21ed86...6995          $430K         $11K        40.0x       $7K loss           0.4%      8d 3h
+  0x135d89...f7b9          $383K         $15K        25.0x      $13K loss           0.6%     >2d 9h
+  0x5899e3...ab46          $323K          $8K        40.0x       $5K gain           1.5%         1h
+  0x6d9532...ff14          $298K          $9K        32.0x       $2K gain           1.8%        39m
+  0x5581dc...293a          $257K          $6K        40.0x       $7K loss           1.4%         1h
+  ...
 
                             Top Open Perps
   Asset       Total Value         Long        Short        Bias
  ────────────────────────────────────────────────────────────────
-  ETH              $18.3M        $8.9M        $9.4M      Neutral
-  BTC              $16.0M        $699K       $15.3M    Very Bearish
-  WDC               $6.5M           $0        $6.5M    Very Bearish
-  SP500             $5.7M        $450K        $5.3M    Very Bearish
-  XYZ100            $2.0M           $0        $2.0M    Very Bearish
-  GOLD              $1.1M        $1.1M           $0    Very Bullish
-  CL                $701K        $100K        $601K    Very Bearish
-  AMZN              $514K        $514K           $0    Very Bullish
-  JPY               $453K           $0        $453K    Very Bearish
-  SMH                 $6K           $0          $6K    Very Bearish
-
-Liquidation Risk by Asset (within 25% of liq price)
-  Asset       Total Value      At Risk     Risk %
- ─────────────────────────────────────────────────
-  WDC               $6.5M        $6.5M     100.0%
-  SMH                 $6K          $6K     100.0%
-  XYZ100            $2.0M        $2.0M     100.0%
-  BTC              $16.0M       $16.0M     100.0%
-  ETH              $18.3M       $18.3M     100.0%
-  JPY               $453K        $453K     100.0%
-  CL                $701K        $701K     100.0%
-  SP500             $5.7M        $5.7M     100.0%
-  MRVL                $3K          $3K     100.0%
-  GOLD              $1.1M        $1.1M     100.0%
-  AMZN              $514K        $514K     100.0%
+  BTC              $18.9M       $16.7M        $2.2M    Very Bullish
+  SP500             $9.7M        $1.5M        $8.2M    Very Bearish
+  ETH               $5.4M        $5.4M         $28K    Very Bullish
+  ZEC               $3.4M        $3.4M           $0    Very Bullish
+  XYZ100            $713K        $713K           $0    Very Bullish
+  AMZN              $510K        $510K           $0    Very Bullish
+  JPY               $454K           $0        $454K    Very Bearish
+  SMH               $286K        $286K           $0    Very Bullish
+  DRAM              $197K        $197K           $0    Very Bullish
+  CRCL              $180K        $180K           $0    Very Bullish
 ```
 
 
