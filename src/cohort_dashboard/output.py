@@ -15,6 +15,7 @@ from cohort_pnl.fetchers.positions import PositionRecord
 from cohort_dashboard.summary import TierSummary
 from cohort_dashboard.asset_breakdown import OpenPerpEntry, LiqRiskEntry
 from cohort_dashboard.exposure import compute_exposure
+from cohort_dashboard.fetchers.fills import PositionAge
 
 console = Console()
 
@@ -67,9 +68,17 @@ def print_wallet_table(
     positions: list[PositionRecord],
     *,
     max_rows: int = 50,
+    ages: dict[str, dict[str, PositionAge]] | None = None,
 ) -> None:
-    """One row per wallet, aggregated. Closest liq = min liq_distance_pct."""
+    """One row per wallet, aggregated. Closest liq = min liq_distance_pct.
+
+    ages: optional {wallet: {coin: PositionAge}} from fetch_all_position_ages.
+    If provided, adds an Age column showing when the most-recently-opened
+    position in the tier was opened (i.e. the youngest position per wallet,
+    so a new trade shows up immediately in the column).
+    """
     from collections import defaultdict
+    from cohort_dashboard.age import format_position_age
 
     # Aggregate per wallet: sum notional, sum margin, sum upnl, track closest liq.
     wallet_notional: dict[str, float] = defaultdict(float)
@@ -107,6 +116,8 @@ def print_wallet_table(
     table.add_column("Exposure", justify="right", min_width=10)
     table.add_column("Sum UPNL", justify="right", min_width=12)
     table.add_column("Closest Liq", justify="right", min_width=12)
+    if ages is not None:
+        table.add_column("Age", justify="right", min_width=8)
 
     for w in wallets:
         notional = wallet_notional[w]
@@ -119,14 +130,26 @@ def print_wallet_table(
         exp_str = f"{exposure:.1f}x" if exposure is not None else "N/A"
         upnl_str = f"[{upnl_style}]{_fmt_value(abs(upnl))} {'gain' if upnl > 0 else 'loss'}[/{upnl_style}]"
 
-        table.add_row(
+        row = [
             w[:8] + "..." + w[-4:],
             _fmt_value(notional),
             _fmt_value(equity),
             exp_str,
             upnl_str,
             _fmt_liq(closest),
-        )
+        ]
+
+        if ages is not None:
+            wallet_ages = ages.get(w, {})
+            if wallet_ages:
+                # Show the youngest (most recently opened) position age.
+                youngest = min(wallet_ages.values(), key=lambda a: a.opened_at)
+                age_str = format_position_age(youngest)
+            else:
+                age_str = "n/a"
+            row.append(age_str)
+
+        table.add_row(*row)
 
     console.print(table)
 

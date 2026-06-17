@@ -48,6 +48,7 @@ async def run(args: argparse.Namespace) -> None:
         print(f"Error: unknown tier '{args.tier}'.\nValid tiers: {slugs}", file=sys.stderr)
         sys.exit(1)
 
+    ages = None
     async with httpx.AsyncClient() as client:
         positions = await get_tier_positions(
             client,
@@ -55,6 +56,14 @@ async def run(args: argparse.Namespace) -> None:
             concurrency=args.concurrency,
             top=args.top,
         )
+        if args.ages:
+            from collections import defaultdict
+            from cohort_dashboard.fetchers.fills import fetch_all_position_ages
+            # Build per-wallet (coin, side) pairs from the classified positions.
+            wallet_positions: dict[str, list[tuple[str, str]]] = defaultdict(list)
+            for p in positions:
+                wallet_positions[p.wallet].append((p.coin, p.side))
+            ages = await fetch_all_position_ages(client, dict(wallet_positions), concurrency=args.concurrency)
 
     summary = compute_tier_summary(positions)
     top_perps = top_open_perps(positions, n=10)
@@ -64,7 +73,7 @@ async def run(args: argparse.Namespace) -> None:
         print(to_json(canonical, summary, positions, top_perps, liq_risk))
     else:
         print_summary_card(canonical, summary)
-        print_wallet_table(positions)
+        print_wallet_table(positions, ages=ages)
         print_top_open_perps(top_perps)
         print_liq_risk_table(liq_risk)
 
@@ -112,6 +121,11 @@ def main() -> None:
         type=int,
         default=1000,
         help="cap wallet universe to first N leaderboard wallets (default 1000, 0 = all)",
+    )
+    ap.add_argument(
+        "--ages",
+        action="store_true",
+        help="fetch userFills to compute position age column (adds one API call per wallet)",
     )
     ap.add_argument(
         "--save",

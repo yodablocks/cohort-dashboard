@@ -21,6 +21,7 @@ cohort-dashboard --tier giga-rekt --concurrency 6
 | `--top` | 1000 | Cap wallet universe to first N leaderboard wallets (0 = all) |
 | `--concurrency` | 8 | Max concurrent API calls |
 | `--json` | off | Output raw JSON instead of rich tables |
+| `--ages` | off | Fetch fill history to compute position age column (adds one API call per wallet) |
 | `--save` | off | Write a daily snapshot to SQLite (accumulates data for v2 sparklines) |
 | `--db` | `data/cohort_dashboard_snapshots.db` | Path to the snapshot database |
 
@@ -136,6 +137,7 @@ Liquidation Risk by Asset (within 25% of liq price)
 - **Closest Liq**: distance between mark price and liquidation price. Closer to 0% means liquidation is imminent. Values above 100% are short positions where price would need to more than double to trigger liquidation -- they are far from liquidation despite appearing in a rekt tier.
 - **N/A on Closest Liq**: cross-margin position. The API does not return a per-position liquidation price for cross-margin accounts.
 - **Semi-rekt vs Giga-rekt**: semi-rekt is a PNL% tier (deep underwater but not necessarily near liquidation). Giga-rekt is a liq-proximity tier (about to be liquidated regardless of PNL%). A wallet can be semi-rekt with 64% liq distance -- bad PNL, but not immediately at risk.
+- **Age column** (requires `--ages`): how long the wallet's youngest tier position has been open. Format: "6h", "23h", "3d 4h". A `>` prefix (e.g. ">2d") means the position predates the 2000-fill API window -- the number is a floor, not the exact age. High-frequency wallets can exhaust the 2000-fill cap in under 24 hours.
 
 ### Money-Print example
 
@@ -204,7 +206,7 @@ Only wallets that appear on the Hyperliquid leaderboard are included. Small or d
 
 ## v2 (in progress)
 
-- **Position age** (requires `userFills` history per wallet -- in progress)
+- **Position age**: `--ages` flag adds an Age column to the wallet table. Uses `userFills` API. Values with `>` prefix are floors (position older than the 2000-fill history window).
 - **Cohort bias sparkline** (requires accumulated daily snapshots -- start accumulating with `--save`)
 - **Cohort exposure time-series** (same -- start accumulating with `--save`)
 
