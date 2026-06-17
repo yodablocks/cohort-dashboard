@@ -138,7 +138,7 @@ Liquidation Risk by Asset (within 25% of liq price)
 - **N/A on Closest Liq**: cross-margin position. The API does not return a per-position liquidation price for cross-margin accounts.
 - **Semi-rekt vs Giga-rekt**: semi-rekt is a PNL% tier (deep underwater but not necessarily near liquidation). Giga-rekt is a liq-proximity tier (about to be liquidated regardless of PNL%). A wallet can be semi-rekt with 64% liq distance -- bad PNL, but not immediately at risk.
 - **Age column** (requires `--ages`): how long the wallet's youngest tier position has been open. Format: "6h", "23h", "3d 4h". A `>` prefix (e.g. ">2d") means the position predates the 2000-fill API window -- the number is a floor, not the exact age. High-frequency wallets can exhaust the 2000-fill cap in under 24 hours.
-- **--ages on large tiers**: the `userFills` endpoint rate-limits aggressively. On tiers with more than 50 wallets a yellow warning is printed and many wallets will show `n/a`. `--ages` works reliably on small tiers (giga-rekt, full-rekt); for larger tiers the Age column is best-effort.
+- **--ages on large tiers**: the `userFills` endpoint rate-limits aggressively. `--ages` is blocked on tiers with more than 50 wallets and exits with an error. Use it with `giga-rekt` (typically ~30 wallets).
 
 ### Money-Print example
 

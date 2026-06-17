@@ -64,11 +64,13 @@ async def run(args: argparse.Namespace) -> None:
                 wallet_positions[p.wallet].append((p.coin, p.side))
             n_wallets = len(wallet_positions)
             if n_wallets > 50:
-                console.print(
-                    f"[yellow]Warning: --ages works best on small tiers (<50 wallets). "
-                    f"This tier has {n_wallets} wallets -- expect many n/a values due to "
-                    f"userFills rate limits.[/yellow]"
+                print(
+                    f"Error: --ages requires a tier with 50 or fewer wallets "
+                    f"(this tier has {n_wallets}). "
+                    f"Try --tier giga-rekt or --tier full-rekt on a quieter day.",
+                    file=sys.stderr,
                 )
+                sys.exit(1)
             ages = await fetch_all_position_ages(client, dict(wallet_positions), concurrency=FILLS_CONCURRENCY)
 
     summary = compute_tier_summary(positions)
