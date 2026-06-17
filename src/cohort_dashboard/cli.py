@@ -58,7 +58,7 @@ async def run(args: argparse.Namespace) -> None:
         )
         if args.ages:
             from collections import defaultdict
-            from cohort_dashboard.fetchers.fills import fetch_all_position_ages, CONCURRENCY as FILLS_CONCURRENCY
+            from cohort_dashboard.fetchers.fills import fetch_all_position_ages
             wallet_positions: dict[str, list[tuple[str, str]]] = defaultdict(list)
             for p in positions:
                 wallet_positions[p.wallet].append((p.coin, p.side))
@@ -71,7 +71,7 @@ async def run(args: argparse.Namespace) -> None:
                     file=sys.stderr,
                 )
                 sys.exit(1)
-            ages = await fetch_all_position_ages(client, dict(wallet_positions), concurrency=FILLS_CONCURRENCY)
+            ages = await fetch_all_position_ages(client, dict(wallet_positions))
 
     summary = compute_tier_summary(positions)
     top_perps = top_open_perps(positions, n=10)

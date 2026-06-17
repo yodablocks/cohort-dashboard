@@ -39,7 +39,9 @@ log = logging.getLogger(__name__)
 
 INFO_URL = "https://api.hyperliquid.xyz/info"
 TIMEOUT = 15.0
-CONCURRENCY = 4  # lower than positions fetcher; fills API rate-limits aggressively at scale
+CONCURRENCY = 20  # per-batch parallelism; batches are separated by BATCH_SLEEP
+BATCH_SIZE = 20   # wallets per batch
+BATCH_SLEEP = 2.0 # seconds between batches -- gives the API time to recover
 
 # One retry only, short delay. A fills miss shows as "n/a" -- acceptable fallback.
 _RETRY_DELAYS = [1.0]
@@ -202,24 +204,24 @@ async def fetch_all_position_ages(
     wallet_positions: dict[str, list[tuple[str, str]]],
     *,
     concurrency: int = CONCURRENCY,
-    batch_sleep: float = 0.5,
+    batch_size: int = BATCH_SIZE,
+    batch_sleep: float = BATCH_SLEEP,
 ) -> dict[str, dict[str, PositionAge]]:
     """Fetch position ages for all wallets in rate-limit-friendly batches.
 
     wallet_positions: {wallet_address: [(coin, side), ...]}
     Returns: {wallet_address: {coin: PositionAge}}
 
-    Processes wallets in batches of `concurrency` with a short sleep between
-    batches to avoid triggering userFills rate limits on large tiers.
-    asyncio.gather on all wallets at once floods the API regardless of the
-    semaphore -- batching is the correct fix.
+    Fires `batch_size` wallets in parallel, sleeps `batch_sleep` seconds,
+    then fires the next batch. This avoids flooding the userFills endpoint
+    which rate-limits much more aggressively than clearinghouseState.
     """
     sem = asyncio.Semaphore(concurrency)
     wallets = list(wallet_positions.keys())
     out: dict[str, dict[str, PositionAge]] = {}
 
-    for i in range(0, len(wallets), concurrency):
-        batch = wallets[i:i + concurrency]
+    for i in range(0, len(wallets), batch_size):
+        batch = wallets[i:i + batch_size]
         tasks = [
             fetch_position_ages(client, w, wallet_positions[w], sem)
             for w in batch
@@ -227,7 +229,7 @@ async def fetch_all_position_ages(
         results = await asyncio.gather(*tasks)
         for wallet, result in zip(batch, results):
             out[wallet] = result
-        if i + concurrency < len(wallets):
+        if i + batch_size < len(wallets):
             await asyncio.sleep(batch_sleep)
 
     return out
