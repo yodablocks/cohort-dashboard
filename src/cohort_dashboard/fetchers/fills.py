@@ -39,12 +39,12 @@ log = logging.getLogger(__name__)
 
 INFO_URL = "https://api.hyperliquid.xyz/info"
 TIMEOUT = 15.0
-CONCURRENCY = 20  # per-batch parallelism; batches are separated by BATCH_SLEEP
-BATCH_SIZE = 20   # wallets per batch
-BATCH_SLEEP = 2.0 # seconds between batches -- gives the API time to recover
+CONCURRENCY = 1   # one wallet at a time to stay within userFills rate limit
+BATCH_SIZE = 1    # one wallet per batch
+BATCH_SLEEP = 0.3 # seconds between wallets
 
-# One retry only, short delay. A fills miss shows as "n/a" -- acceptable fallback.
-_RETRY_DELAYS = [1.0]
+# On 429: wait 3s, retry; if still 429, wait 5s, retry; then give up.
+_RETRY_DELAYS = [3.0, 5.0]
 
 
 @dataclass(frozen=True)
@@ -152,7 +152,7 @@ async def _fetch_fills_raw(
                 resp = await client.post(INFO_URL, json=body, timeout=TIMEOUT)
                 is_429 = resp.status_code == 429
                 if is_429:
-                    log.debug("userFills 429 for %s (attempt %d)", wallet[:10], attempt)
+                    pass
                 else:
                     resp.raise_for_status()
                     return resp.json()
