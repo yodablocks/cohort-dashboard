@@ -320,6 +320,63 @@ Liquidation Risk by Asset (within 25% of liq price)
   SOL              $53.9M        $446K       0.8%
 ```
 
+### Money-Print with --ages example
+
+144 wallets, zero warnings, clean run:
+
+```
+cohort-dashboard --tier money-print --ages
+╭──────────────────────── Summary ─────────────────────────╮
+│ Tier: Money Print                                        │
+│ Wallets: 144                                             │
+│ Open Value: $329.6M Long  $257.0M Short  ($586.6M total) │
+│ In Profit: 144 (100%)  Underwater: 0 (0%)                │
+╰──────────────────────────────────────────────────────────╯
+Data as of 2026-06-18 08:37 UTC
+
+  Wallet              Open Value       Equity     Exposure       Sum UPNL    Closest Liq         Age
+ ────────────────────────────────────────────────────────────────────────────────────────────────────
+  0x6315c7...074a         $49.9M        $3.8M        13.1x     $6.0M gain          67.7%     >12d 1h
+  0x32008f...c407         $47.3M        $2.9M        16.5x     $9.1M gain          56.4%         n/a
+  0x8af700...fa05         $36.1M        $3.8M         9.4x    $10.1M gain          89.5%     >1d 18h
+  0x9e8b1e...afc4         $31.4M        $6.2M         5.0x     $3.7M gain          17.0%         n/a
+  0x8def9f...2dae         $24.4M        $2.4M        10.0x     $5.7M gain            N/A         n/a
+  0x153c84...319a         $21.8M        $2.4M         9.1x     $2.6M gain          34.0%   >250d 11h
+  0x6859da...7e1e         $17.1M        $819K        20.9x     $3.5M gain          44.6%        >18h
+  0x152e41...c9dc         $17.0M        $1.7M        10.0x     $1.6M gain            N/A        >20h
+  0xea0027...a918         $15.2M        $2.1M         7.2x     $2.4M gain          87.4%     18d 13h
+  0x7fdafd...17d1         $14.0M        $1.4M        10.0x     $6.3M gain            N/A         >1h
+  ...
+
+                            Top Open Perps
+  Asset       Total Value         Long        Short        Bias
+ ────────────────────────────────────────────────────────────────
+  HYPE            $144.1M      $144.1M           $0    Very Bullish
+  ETH              $80.7M       $33.9M       $46.9M      Bearish
+  BTC              $56.0M        $855K       $55.1M    Very Bearish
+  ZEC              $51.8M       $33.9M       $17.9M      Bullish
+  CL               $31.4M           $0       $31.4M    Very Bearish
+  SP500            $27.2M       $27.2M           $0    Very Bullish
+  NEAR             $25.2M       $13.7M       $11.5M      Neutral
+  SOL              $18.3M       $12.3M        $6.0M      Bullish
+  WLD              $15.7M       $15.7M         $36K    Very Bullish
+  XRP              $11.8M        $2.4M        $9.4M    Very Bearish
+
+Liquidation Risk by Asset (within 25% of liq price)
+  Asset       Total Value      At Risk     Risk %
+ ─────────────────────────────────────────────────
+  CL               $31.4M       $31.4M     100.0%
+  SPCX              $1.4M        $1.2M      84.3%
+  SOL              $18.3M       $10.4M      56.7%
+  XRP              $11.8M        $4.1M      34.9%
+  BTC              $56.0M       $14.0M      24.9%
+  HYPE            $144.1M       $21.5M      14.9%
+  ETH              $80.7M       $10.1M      12.5%
+  ZEC              $51.8M        $1.8M       3.5%
+```
+
+Notable: money-print is the mirror of semi-rekt on HYPE -- $144M long (very bullish) vs semi-rekt's $261M short. Age column shows positions held for weeks to months (`>250d 11h` oldest), consistent with a tier that opened early and is sitting on gains.
+
 ### Snapshot schema
 
 `--save` writes one row per (date, tier) to `cohort_tier_snapshots`:
